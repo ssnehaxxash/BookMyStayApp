@@ -50,16 +50,25 @@ class RoomInventory {
         return inventory.getOrDefault(roomType, 0);
     }
 
-    public void updateAvailability(String roomType, int count) {
-        if (inventory.containsKey(roomType)) {
-            inventory.put(roomType, count);
-        }
+    public Map<String, Integer> getAllAvailability() {
+        return new HashMap<>(inventory);
+    }
+}
+
+class RoomSearchService {
+    private RoomInventory inventory;
+
+    public RoomSearchService(RoomInventory inventory) {
+        this.inventory = inventory;
     }
 
-    public void displayInventory() {
-        System.out.println("=== Current Room Inventory ===");
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " Rooms Available: " + entry.getValue());
+    public void displayAvailableRooms(Room[] rooms) {
+        System.out.println("=== Available Rooms ===");
+        for (Room room : rooms) {
+            if (inventory.getAvailability(room.type) > 0) {
+                room.displayDetails();
+                System.out.println("Available: " + inventory.getAvailability(room.type));
+            }
         }
     }
 }
@@ -72,15 +81,14 @@ public class BookMyStayApp {
         DoubleRoom doubleRoom = new DoubleRoom();
         SuiteRoom suite = new SuiteRoom();
 
+        Room[] rooms = {single, doubleRoom, suite};
+
         RoomInventory inventory = new RoomInventory();
         inventory.addRoomType(single.type, 5);
         inventory.addRoomType(doubleRoom.type, 3);
-        inventory.addRoomType(suite.type, 2);
+        inventory.addRoomType(suite.type, 0); // suite unavailable
 
-        single.displayDetails();
-        doubleRoom.displayDetails();
-        suite.displayDetails();
-
-        inventory.displayInventory();
+        RoomSearchService searchService = new RoomSearchService(inventory);
+        searchService.displayAvailableRooms(rooms);
     }
 }
